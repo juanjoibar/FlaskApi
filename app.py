@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask , json
 from flask import render_template,request, url_for
-from pymysql import cursors
+from pymysql import cursors, OperationalError
 from werkzeug.utils import append_slash_redirect, redirect
-from flaskext.mysql import MySQL
+from flaskext.mysql import MySQL 
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -13,6 +13,13 @@ app.config['MYSQL_DATABASE_USER']='root'
 app.config['MYSQL_DATABASE_PASSWORD']=''
 app.config['MYSQL_DATABASE_BD']='sistemas1121' 
 mysql.init_app(app)
+conn = mysql.connect()
+   #test de prueba de la conxion de la base. 
+    try:
+     cursor = conn.cursor()
+    except OperationalError as error:
+     code, msg = error.args
+     print(msg)
 
 
 @app.route('/')
@@ -23,15 +30,11 @@ def idex():
 @app.route('/empleados')
 def empleados():
     #no se porque el delete
-    sql = 'select * from `sistemas1121`.`empleados` ;'
-    conn = mysql.connect()
-
-    cursor = conn.cursor()
+ sql = 'select * from `sistemas1121`.`empleados` ;'
     
-    cursor.execute(sql)
-    empleados = cursor.fetchall()
-
-    conn.commit()
+ cursor.execute(sql)
+ empleados = cursor.fetchall()
+ conn.commit()
 
 
 @app.route('/empleado')
@@ -44,9 +47,9 @@ def empleado():
     
     cursor.execute(sql)
     empleados = cursor.fetchall()
-
     conn.commit()
-
+    print(empleados)
+    return jsonify(empleados)
 
 
 
